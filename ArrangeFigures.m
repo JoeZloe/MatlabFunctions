@@ -138,6 +138,7 @@ fy = (h - fh(1)) - sort(reshape(repmat(Spacer + (0 : NRows - 1) * ...
 
 Offset = 0;
 Ycoordinate = 0;
+[~,SortFigPos] = sort([FigureHandles.Number]);
 for n = 1:NFigures
     if fx(n) < monitorArea(3) && fx(n) + fw(n) > monitorArea(3)
         Offset = monitorArea(3) + Spacer - fx(n);
@@ -147,7 +148,7 @@ for n = 1:NFigures
     end
 
     fx(n) = fx(n) + Offset;
-    set(FigureHandles(n), 'position', [fx(n) fy(n) fw(n) fh(n)])
+    set(FigureHandles(SortFigPos(n)), 'position', [fx(n) fy(n) fw(n) fh(n)])
 end
 
 for FigureHandle = FigureHandles'
