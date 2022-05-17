@@ -1,6 +1,13 @@
 function [Amplitude, Phase] = CalculateFFT(SignalData, SampFreq, varargin)
-% CalculateFFT calculates the FFT and plots the Spectrum in frequency
-% domain
+% CalculateFFT calculates the FFT and plots the Spectrum in frequency domain
+
+% vargin options:
+% vargin{1} ... SavePlot    ... input a name for the figure
+% vargin{2} ... XScal       ... Scaling for the x-Axis; 
+%                               e.g.: 0.5 means from 0 to (0.5*fs) * 0.5
+%                               for a one sided spectrum
+
+
 
 if nargin > 4
     error('Incorrect number of input arguments.')
@@ -17,28 +24,22 @@ elseif nargin < 2
 
 elseif nargin == 2
     XScal = 1;
-    Plotting = true;
+    SavePlot = [];
 
 elseif nargin == 3
     XScal = 1;
-    Plotting = varargin{1};
+    SavePlot = varargin{1};
 
 elseif nargin == 4
-    Plotting = varargin{1};
+    SavePlot = varargin{1};
     XScal = varargin{2};
-
 end
 
 % checking for correct input
 NumSig = size(SignalData, 1);
 if NumSig ~= size(SampFreq, 1)
     error('Amount of signals is not consistent with the amount of sampling frequencies!');
-
-elseif isempty(Plotting)
-    Plotting = true;
-
 end
-
 
 N = length(SignalData);
 
@@ -56,25 +57,35 @@ for i = 1 : NumSig
 end
 
 % plotting the one sided spectrum
-if Plotting
-    k = 0 : (N/2) - 1;
-    f = k * SampFreq(i) / N * XScal;
-    for i = 1 : NumSig
-        figure;
-        t = tiledlayout(2, 1);
-        ax1 = nexttile;
-        stem(ax1, f, Amplitude(i, :)); grid on; 
+k = 0 : (N/2) - 1;
+f = k * SampFreq(i) / N * XScal;
+for i = 1 : NumSig
+    figure;
+    TL = tiledlayout(2, 1);
+    ax1 = nexttile;
+    stem(ax1, f, Amplitude(i, :)); grid on; 
 
-        ax2 = nexttile;
-        stem(ax2, f, Phase(i, :)); grid on;
+    ax2 = nexttile;
+    stem(ax2, f, Phase(i, :)); grid on;
 
-        title(ax1, "One-Sided Phase Spectrum", 'Interpreter', 'latex');
-        title(ax2, "One-Sided Magnitude Spectrum", 'Interpreter', 'latex');
-        xticklabels(ax1,{})
-        xlabel(ax2, "f [Hz] $\rightarrow$", 'Interpreter', 'latex');
-        ylabel(ax1, 'abs(X(t)) $\rightarrow$', 'Interpreter', 'latex');
-        ylabel(ax2, "arg(X(t)) $\rightarrow$", 'Interpreter', 'latex');
+    title(ax1, "One-Sided Phase Spectrum", 'Interpreter', 'latex');
+    title(ax2, "One-Sided Magnitude Spectrum", 'Interpreter', 'latex');
+    xticklabels(ax1,{})
+    xlabel(ax2, "f [Hz] $\rightarrow$", 'Interpreter', 'latex');
+    ylabel(ax1, 'abs(X(t)) $\rightarrow$', 'Interpreter', 'latex');
+    ylabel(ax2, "arg(X(t)) $\rightarrow$", 'Interpreter', 'latex');
 
-        t.TileSpacing = 'compact';
-    end
+    TL.TileSpacing = 'compact';
 end
+
+
+try
+    ArrangeFigures;
+catch
+end
+
+if ischar(SavePlot) || isstring(SavePlot)
+    exportgraphics(TL, [char(SavePlot) '.pdf'], 'ContentType', 'vector');
+end
+
+

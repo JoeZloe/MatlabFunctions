@@ -1,26 +1,22 @@
 function ArrangeFigures(varargin)
 % arrangeFigures automatically aranges open figures in a grid on the
-% designated screen monitor. Options are:
-%
-% arrangefigures
-% arrangefigures(monitor)
-% arrangefigures(monitor, fRatio)
-% arrangefigures(monitor, [w h])
-%
+% designated screen monitor and puts them into the foreground.
+% 
+% 
+% Options are:
+% - arrangefigures
+% - arrangefigures(monitor)
+% - arrangefigures(monitor, fRatio)
 %
 % Possible settings are:
-%
-% monitor:
-% - default: 2
-% - 0 means all monitors
-% - scalar input means specified monitor
-% - array input means multiple chosen monitors. Monitors must be successive
-% fRatio:
-% - default: 3/4
-% - set the figure ratio in height/width (default: 3/4)
-% [h w]:
-% - default: -> default is fRatio
-% - set a fixed width (w) and height (h) in pixels
+% - monitor:
+%    - default: 2
+%    - 0 means all monitors
+%    - scalar input means specified monitor
+%    - array input means multiple chosen monitors. Monitors must be successive
+% - fRatio:
+%    - default: 3/4
+%    - set the figure ratio in height/width (default: 3/4)
 
 if nargin > 3
     warning('Incorrect number of input arguments. Leaving figures unchanged.')
@@ -36,12 +32,6 @@ elseif nargin == 2
     fRatio = varargin{2};
 end
 
-if numel(fRatio) == 2
-    fh = fRatio(2);
-    fw = fRatio(1);
-    fRatio = fh/fw;
-end
-
 Spacer = 40;
 
 % get figure handles
@@ -53,51 +43,57 @@ MonitorExtends = get(0, 'MonitorPositions');
 NMonitors = size(MonitorExtends, 1);
 
 if Monitor == 0
-    Monitor = 1:NMonitors
+    Monitor = 1:NMonitors;
 end
 
 % check if monitor-array exceeds number of monitors
 if min(Monitor) > NMonitors
-    error(['Can''t find assigned monitor: NMonitors = ' ...
-        num2str(NMonitors) ', Set display monitor = [' num2str((Monitor)) ']'])
+    warning(['Cannot find assigned monitor: [' num2str(Monitor), newline, ...
+        ']. -> Set display monitor: 1'])
+    Monitor = 1;
 
 elseif min(Monitor) < 1
-    warning(['Can''t find assigned monitor: NMonitors = ' ...
-        num2str(NMonitors) ', Set display monitor = [' num2str((Monitor)) ...
-        ']. Skipping monitors < 0'])
+    Buffer = Monitor;k,
+    Monitor = Monitor(Monitor > 0);
+    warning(['Cannot find assigned monitor: [' num2str(Buffer), ']', newline, ...
+        'Set display monitor: [' num2str(Monitor) ']. -> Skipping monitors < 0']);
+    clear Buffer;
 
-    Monitor = Monitor(Monitor > 0);    
+    if numel(Monitor) == 0
+        warning('No monitors > 0 assigned. -> Set display monitor: 1')
+        Monitor = 1;
+    end
 
 elseif max(Monitor) > NMonitors
-    warning(['Can''t find assigned monitor: NMonitors = ' ...
-        num2str(NMonitors) ', Set display monitor = [' num2str((Monitor)) '' ...
-        ']. Skipping monitors > ' num2str(NMonitors)])
-
+    Buffer = Monitor;
     Monitor = Monitor(Monitor <= NMonitors);
+    warning(['Cannot find assigned monitor: [' num2str(Buffer), ']', newline, ...
+        'Set display monitor: [' num2str(Monitor) ']. -> Skipping monitors > ' ...
+        num2str(NMonitors)]);
 
 elseif isempty(Monitor)
-    error('Assign a correct monitor')
+    error('Assign a correct monitor!')
 end
 
-UsedMonitorExtends = MonitorExtends(Monitor, :)
-TaskbarOffset = 100;
-monitorArea = [min(UsedMonitorExtends(:, 1:2), [], 1) ...
-               max(UsedMonitorExtends(:, 3:4), [], 1)]
-x = monitorArea(1);
-y = monitorArea(2);
-w = monitorArea(3) * size(UsedMonitorExtends, 1);
-h = monitorArea(4) - TaskbarOffset; % 100 offset for taskbar
+UsedMonitorExtends = MonitorExtends(Monitor, :);
+TaskbarOffset = 50;
+MonitorArea = [min(UsedMonitorExtends(:, 1:2), [], 1) ...
+               max(UsedMonitorExtends(:, 3:4), [], 1)];
+x = MonitorArea(1);
+y = MonitorArea(2);
+w = MonitorArea(3) * size(UsedMonitorExtends, 1);
+h = MonitorArea(4) - TaskbarOffset; % 100 offset for taskbar
 
-% determine size figures and grid to maximize area covered with figures
+% determine size of figures and grid to maximize area covered with figures
 HightSpacer = 50;
 if ~exist('fw', 'var')
     FigureArea = 0;
     for NRows = 1:NFigures
         NCols = ceil(NFigures / NRows);
-        fh = (h - 2*Spacer) / NRows - HightSpacer;
+        fh = (h - Spacer) / NRows - Spacer - HightSpacer;
         fw = fh / fRatio;
-        if fw > ((w - 2*Spacer) / NCols - Spacer)
-            fw = (w - 2*Spacer) / NCols - Spacer;
+        if fw > ((w - Spacer) / NCols - Spacer)
+            fw = (w - Spacer) / NCols - Spacer;
             fh = fw * fRatio;
         end
 
@@ -110,8 +106,8 @@ if ~exist('fw', 'var')
 
     NRows = SetNRows;
     NCols = SetNCols;
-    fh = (h - 2*Spacer) / NRows - HightSpacer;
-    fw = (w - 2*Spacer) / NCols - Spacer;
+    fh = (h - Spacer) / NRows - Spacer - HightSpacer;
+    fw = (w - Spacer) / NCols - Spacer;
 
     if (fh/fw > fRatio)
         fh = fw * fRatio;
@@ -120,8 +116,8 @@ if ~exist('fw', 'var')
     end
 
 else
-    NCols = floor((w - 2*Spacer) / (fw - Spacer));
-    NRows = floor((h - 2*Spacer) / (fh - Spacer));
+    NCols = floor((w - Spacer) / (fw - Spacer));
+    NRows = floor((h - Spacer) / (fh - Spacer));
     if (NCols * NRows < NFigures)
         warning(['Cannot display ' num2str(NFigures) ' figures using [w h] = [' ...
             num2str(w) ' ' num2str(h) '] on monitor ' num2str(Monitor) ...
@@ -138,10 +134,10 @@ fy = (h - fh(1)) - sort(reshape(repmat(Spacer + (0 : NRows - 1) * ...
 
 Offset = 0;
 Ycoordinate = 0;
-[~,SortFigPos] = sort([FigureHandles.Number]);
+[~, SortFigPos] = sort([FigureHandles.Number]);
 for n = 1:NFigures
-    if fx(n) < monitorArea(3) && fx(n) + fw(n) > monitorArea(3)
-        Offset = monitorArea(3) + Spacer - fx(n);
+    if fx(n) < MonitorArea(3) && fx(n) + fw(n) > MonitorArea(3)
+        Offset = MonitorArea(3) + Spacer - fx(n);
         Ycoordinate = fy(n);
     elseif Ycoordinate ~= fx(n)
         Offset = 0;
@@ -154,5 +150,4 @@ end
 for FigureHandle = FigureHandles'
     figure(FigureHandle);
 end
-
 end
