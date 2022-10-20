@@ -17,6 +17,9 @@ function ArrangeFigures(varargin)
 % - fRatio:
 %    - default: 3/4
 %    - set the figure ratio in height/width (default: 3/4)
+% 
+% If the figures cannot be resized due to WindowStyle = 'docked', change
+% FigureHandle(i).WindowStyle to 'normal'.
 
 if nargin > 3
     warning('Incorrect number of input arguments. Leaving figures unchanged.')
@@ -86,7 +89,6 @@ h = MonitorArea(4) - TaskbarOffset; % 100 offset for taskbar
 
 % determine size of figures and grid to maximize area covered with figures
 HightSpacer = 50;
-if ~exist('fw', 'var')
     FigureArea = 0;
     for NRows = 1:NFigures
         NCols = ceil(NFigures / NRows);
@@ -114,17 +116,6 @@ if ~exist('fw', 'var')
     else
         fw = fh / fRatio;
     end
-
-else
-    NCols = floor((w - Spacer) / (fw - Spacer));
-    NRows = floor((h - Spacer) / (fh - Spacer));
-    if (NCols * NRows < NFigures)
-        warning(['Cannot display ' num2str(NFigures) ' figures using [w h] = [' ...
-            num2str(w) ' ' num2str(h) '] on monitor ' num2str(Monitor) ...
-            '. Leaving figures unchanged.']);
-        return
-    end
-end
 
 fw = floor(repmat(fw, [1 NFigures]));
 fh = floor(repmat(fh, [1 NFigures]));

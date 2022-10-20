@@ -62,20 +62,20 @@ f = k * SampFreq(i) / N * XScal;
 for i = 1 : NumSig
     figure;
     TL = tiledlayout(2, 1);
-    ax1 = nexttile;
-    stem(ax1, f, Amplitude(i, :)); grid on; 
+    ax(1) = nexttile;
+    stem(ax(1), f, Amplitude(i, :)); grid on; 
 
-    ax2 = nexttile;
-    stem(ax2, f, Phase(i, :)); grid on;
+    ax(2) = nexttile;
+    stem(ax(2), f, Phase(i, :)); grid on;
 
-    title(ax1, "One-Sided Phase Spectrum", 'Interpreter', 'latex');
-    title(ax2, "One-Sided Magnitude Spectrum", 'Interpreter', 'latex');
-    xticklabels(ax1,{})
-    xlabel(ax2, "f [Hz] $\rightarrow$", 'Interpreter', 'latex');
-    ylabel(ax1, 'abs(X(t)) $\rightarrow$', 'Interpreter', 'latex');
-    ylabel(ax2, "arg(X(t)) $\rightarrow$", 'Interpreter', 'latex');
+    title(ax(1), "One-Sided Phase Spectrum", 'Interpreter', 'latex');
+    title(ax(2), "One-Sided Magnitude Spectrum", 'Interpreter', 'latex');
+    xticklabels(ax(1),{})
+    xlabel(ax(2), "f [Hz] $\rightarrow$", 'Interpreter', 'latex');
+    ylabel(ax(1), 'abs(X(t)) $\rightarrow$', 'Interpreter', 'latex');
+    ylabel(ax(2), "arg(X(t)) $\rightarrow$", 'Interpreter', 'latex');
 
-    TL.TileSpacing = 'compact';
+    TL.TileSpacing = 'tight';
 end
 
 
