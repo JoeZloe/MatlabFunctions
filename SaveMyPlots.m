@@ -20,6 +20,14 @@ else
     error('wrong input argument!');
 end
 
+if exist( 'plots', 'dir' ) == 0
+    mkdir plots
+else
+    % do nothing
+end
+
+cd([char(cd), '\plots']);
+
 FigureHandles = sort(get(0, 'Children'));
 NFigures = numel(FigureHandles);
 
@@ -27,6 +35,16 @@ for i = 1 : NFigures
     figure(FigureHandles(i));
     sgT = sgtitle;
     sgT = erase(sgT.String, " ");
-    exportgraphics(FigureHandles(i), [char(sgT) filextention], ...
+    try
+        exportgraphics(FigureHandles(i), [char(sgT) filextention], ...
                                         'ContentType', type);
+    catch
+        sgT = input(['The title:\n' char(sgT) ...
+                     '\n is not working as title, enter custom: \n'], 's');
+        exportgraphics(FigureHandles(i), [char(sgT) filextention], ...
+                                        'ContentType', type);
+    end
+end
+
+cd ..
 end
